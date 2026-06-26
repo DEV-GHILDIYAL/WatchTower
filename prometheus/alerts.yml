@@ -1,0 +1,29 @@
+groups:
+  - name: watchtower_alerts
+    rules:
+      - alert: HighCPU
+        expr: system_cpu_percent > 80
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%, which is above the 80% threshold."
+
+      - alert: HighMemory
+        expr: system_memory_percent > 85
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}%, which is above the 85% threshold."
+
+      - alert: HighDisk
+        expr: system_disk_percent > 90
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High Disk usage on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}%, which is above the 90% threshold."

@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  exporter:
+    build:
+      context: ./exporter
+    container_name: exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - watchtower-network
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - watchtower-network
+    restart: always
+
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    environment:
+      - HTTP_PROXY=http://host.docker.internal:3128
+      - HTTPS_PROXY=http://host.docker.internal:3128
+      - http_proxy=http://host.docker.internal:3128
+      - https_proxy=http://host.docker.internal:3128
+      - NO_PROXY=localhost,prometheus,grafana,exporter
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--log.level=debug'
+    networks:
+      - watchtower-network
+    restart: always
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=watchtower
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    networks:
+      - watchtower-network
+    restart: always
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  watchtower-network:
+    driver: bridge
