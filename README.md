@@ -29,6 +29,14 @@ graph TD
     Prometheus -->|Query Datasource| Grafana[Grafana :3000]
 ```
 
+## Screenshots
+
+### Grafana Dashboard
+![Grafana Dashboard](screenshots/grafana-dashboard.png)
+
+### Prometheus Metrics
+![Prometheus Graph](screenshots/prometheus-graph.png)
+
 ---
 
 ## Setup & Installation
